@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cálculo de Velocidad y Validación de Torricelli</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            color: #2c3e50;
+            text-align: center;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="number"] {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .results {
+            margin-top: 20px;
+            padding: 15px;
+            background: #ecf0f1;
+            border-radius: 4px;
+        }
+        .success {
+            color: #27ae60;
+            font-weight: bold;
+        }
+        .warning {
+            color: #c0392b;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Comparación de Velocidad Experimental y Torricelli</h2>
+    
+    <div class="form-group">
+        <label for="delta_y">Altura entre la boquilla y el suelo (&Delta;y, en m):</label>
+        <input type="number" id="delta_y" step="any" placeholder="Ej. 0.5">
+    </div>
+
+    <div class="form-group">
+        <label for="delta_x">Distancia horizontal recorrida (&Delta;x, en m):</label>
+        <input type="number" id="delta_x" step="any" placeholder="Ej. 0.7">
+    </div>
+
+    <div class="form-group">
+        <label for="h">Altura de agua sobre la boquilla (h, en m):</label>
+        <input type="number" id="h" step="any" placeholder="Ej. 0.46">
+    </div>
+
+    <button onclick="calcular()">Calcular</button>
+
+    <div class="results" id="resultados" style="display: none;">
+        <h3>Resultados:</h3>
+        <p id="res_exp"></p>
+        <p id="res_torri"></p>
+        <p id="res_error"></p>
+        <p id="res_mensaje"></p>
+    </div>
+</div>
+
+<script>
+function calcular() {
+    const g = 9.81;
+    const delta_y = parseFloat(document.getElementById('delta_y').value);
+    const delta_x = parseFloat(document.getElementById('delta_x').value);
+    const h = parseFloat(document.getElementById('h').value);
+
+    if (isNaN(delta_y) || isNaN(delta_x) || isNaN(h) || delta_y <= 0 || delta_x < 0 || h < 0) {
+        alert("Por favor, ingrese valores numéricos válidos (alturas mayores a cero).");
+        return;
+    }
+
+    // 1. Velocidad experimental: v = delta_x * sqrt(g / (2 * delta_y))
+    const v_experimental = delta_x * Math.sqrt(g / (2 * delta_y));
+
+    // 2. Velocidad teórica (Torricelli): v = sqrt(2 * g * h)
+    const v_torricelli = Math.sqrt(2 * g * h);
+
+    // 3. Porcentaje de error
+    let porcentaje_error = 0;
+    if (v_torricelli !== 0) {
+        porcentaje_error = Math.abs((v_torricelli - v_experimental) / v_torricelli) * 100;
+    }
+
+    // Mostrar resultados en pantalla
+    document.getElementById('res_exp').innerText = `Velocidad experimental = ${v_experimental.toFixed(3)} m/s`;
+    document.getElementById('res_torri').innerText = `Velocidad (Torricelli) = ${v_torricelli.toFixed(3)} m/s`;
+    document.getElementById('res_error').innerText = `Error porcentual = ${porcentaje_error.toFixed(2)}%`;
+
+    const mensajeEl = document.getElementById('res_mensaje');
+    if (porcentaje_error <= 5.0) {
+        mensajeEl.innerHTML = "✓ La ecuación de Torricelli funciona correctamente (error &le; 5%).";
+        mensajeEl.className = "success";
+    } else {
+        mensajeEl.innerHTML = "⚠️ Se recomienda no utilizar la ecuación de Torricelli (error > 5%).";
+        mensajeEl.className = "warning";
+    }
+
+    document.getElementById('res_resultados').style.display = 'block';
+}
+</script>
+
+</body>
+</html>
